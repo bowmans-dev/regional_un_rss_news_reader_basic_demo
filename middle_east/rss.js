@@ -4,8 +4,7 @@ feedUrl = 'https://news.un.org/feed/subscribe/en/news/region/middle-east/feed/rs
 fetch(feedUrl).then((res) => {
   res.text().then((xmlTxt) => {
     
-    var domParser = new DOMParser()
-    let doc = domParser.parseFromString(xmlTxt, 'text/xml');
+    let doc = new DOMParser().parseFromString(xmlTxt, 'text/xml');
     doc.querySelectorAll('item').forEach((item) => {
 
       let h1 = document.createElement('h1');
