@@ -1,82 +1,84 @@
-var africaRSS = document.createElement("script");
-africaRSS.src = "./africa/rss.js";
-africaRSS.defer = true;
-
-
-var americasRSS = document.createElement("script");
-americasRSS.src = "./americas/rss.js";
-americasRSS.defer = true;
-
-
-var asiaPacificRSS = document.createElement("script");
-asiaPacificRSS.src = "./asia_pacific/rss.js";
-asiaPacificRSS.defer = true;
-
-
-var europeRSS = document.createElement("script");
-europeRSS.src = "./europe/rss.js";
-europeRSS.defer = true;
-
-var middleEastRSS = document.createElement("script");
-middleEastRSS.src = "./middle_east/rss.js";
-middleEastRSS.defer = true;
-
-
-var x = document.querySelectorAll("button");
-
-// Function to test if all regions have been loaded
-function test() { 
-  if (x[0].style.visibility == "hidden" && x[1].style.visibility == "hidden" && x[2].style.visibility == "hidden" && x[3].style.visibility == "hidden" && x[4].style.visibility == "hidden") {
-    document.querySelector("output").innerHTML = `All regions loaded <button> <a href="index.html">⬅︎</a> </button>`;
-    document.querySelector("em").innerHTML = "All regions loaded";
-    document.querySelector("em").style = "background-color: white; margin-right: 5px; font-size: 0.5em;";
-  }
+const urls = {
+  "africa-button" : "https://news.un.org/feed/subscribe/en/news/region/africa/feed/rss.xml",
+  "americas-button" : "https://news.un.org/feed/subscribe/en/news/region/americas/feed/rss.xml",
+  "asia-button" : "https://news.un.org/feed/subscribe/en/news/region/asia-pacific/feed/rss.xml",
+  "europe-button" : "https://news.un.org/feed/subscribe/en/news/region/europe/feed/rss.xml",
+  "middle-east-button" : "https://news.un.org/feed/subscribe/en/news/region/middle-east/feed/rss.xml"
 }
 
+document.getElementById("africa-button").addEventListener("click", function (event) {
+  document.querySelector('output').innerHTML = ""; // Clear output element
+  loadRegion(event.target.id);
+});
 
+document.getElementById("americas-button").addEventListener("click", function (event) {
+  document.querySelector('output').innerHTML = ""; // Clear output element
+  loadRegion(event.target.id);
+});
 
-function loadAfrica() {
+document.getElementById("asia-button").addEventListener("click", function (event) {
+  document.querySelector('output').innerHTML = ""; // Clear output element
+  loadRegion(event.target.id);
+});
+
+document.getElementById("europe-button").addEventListener("click", function (event) {
+  document.querySelector('output').innerHTML = ""; // Clear output element
+  loadRegion(event.target.id);
+});
+
+document.getElementById("middle-east-button").addEventListener("click", function (event) {
+  document.querySelector('output').innerHTML = ""; // Clear output element
+  loadRegion(event.target.id);
+});
+
+const loadRegion = (key) => {
+
+  let url = urls[key];
+
+  fetch(url).then((res) => {
     
-  document.querySelector("output").innerHTML = "Loading Africa News...";
-  document.querySelector("em").innerHTML = "Loading Africa News...";
-  document.querySelector("em").style = "background-color: white; margin-right: 5px; font-size: 0.5em;";
-  document.querySelector("p").appendChild(africaRSS);
-  document.getElementById("africa").style.visibility = "hidden";
-  test()
-}
+    res.text().then((xmlTxt) => {
 
-function loadAmericas() {
+      // Parse XML string into DOM object and loop through each item in the feed
+      let doc = new DOMParser().parseFromString(xmlTxt, 'text/xml');
+      doc.querySelectorAll('item').forEach((item) => {
 
-  document.querySelector("output").innerHTML = "Loading Americas News...";
-  document.querySelector("em").innerHTML = "Loading Americas News...";
-  document.querySelector("p").appendChild(americasRSS);
-  document.getElementById("americas").style.visibility = "hidden";
-  test()
-}
+        // display date of article
+        let date = document.createElement('p');
+        date.textContent = item.querySelector('pubDate').textContent;
+        //remove the time from the date
+        date.textContent = date.textContent.slice(0, 16);
+        date.classList.add("date");
+        document.querySelector('output').appendChild(date);
 
-function loadAsiaPacific() {
+        // display title of article
+        let h1 = document.createElement('h1');
+        h1.textContent = item.querySelector('title').textContent;
+        document.querySelector('output').appendChild(h1);
+        
+        // display main paragraph main article
+        let p = document.createElement('p');
+        p.textContent = item.querySelector('description').textContent;
+        document.querySelector('output').appendChild(p);
 
-  document.querySelector("output").innerHTML = "Loading Asia Pacific News...";
-  document.querySelector("em").innerHTML = "Loading Asia Pacific News...";
-  document.querySelector("p").appendChild(asiaPacificRSS);
-  document.getElementById("asiaPacific").style.visibility = "hidden";
-  test()
-}
+        // get image from article
+        let imageURL = document.createElement('img');
+        imageURL.setAttribute('src', item.querySelector('enclosure').getAttribute('url'));
+        imageURL.classList.add("image");
+        document.querySelector('output').appendChild(imageURL);
 
-function loadEurope() {
+        //display link to article and open in a new tab 
+        let link = document.createElement('a');
+        link.setAttribute('href', item.querySelector('link').textContent);
+        link.setAttribute('target', '_blank');
+        link.textContent = item.querySelector('link').textContent;
+        link.classList.add("link");
+        document.querySelector('output').appendChild(link);  
 
-  document.querySelector("output").innerHTML = "Loading Europe News...";
-  document.querySelector("em").innerHTML = "Loading Europe News...";
-  document.querySelector("p").appendChild(europeRSS);
-  document.getElementById("europe").style.visibility = "hidden";
-  test()
-}
-
-function loadMiddleEast() {
-
-  document.querySelector("output").innerHTML = "Loading Middle East News...";
-  document.querySelector("em").innerHTML = "Loading Middle East News...";
-  document.querySelector("p").appendChild(middleEastRSS);
-  document.getElementById("middleEast").style.visibility = "hidden";
-  test()
+        //display line break
+        let hr = document.createElement('hr');
+        document.querySelector('output').appendChild(hr);
+      });
+    });
+  });
 }
